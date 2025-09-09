@@ -14,6 +14,7 @@
 .vscode/launch.json
 .vscode/c_cpp_properties.json
 *.code-workspace
+*.DS_Store
 
 # Precompiled Headers
 *.gch
