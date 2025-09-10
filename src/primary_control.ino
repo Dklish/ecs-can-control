@@ -13,7 +13,6 @@ Author:Diego Klish
 #define REVERSE_LED 8
 
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;//define CAN bus 
-
 #define PRIMARY_STATUS_ID    0x4B4  // System Status from Primary Control
 #define PRIMARY_PROP_ID      0x4B2  // Propulsion Status from Primary
 
@@ -88,6 +87,7 @@ void handleLEDs(){
 void sendCANMessages(int potValue){
   // Just send throttle percentage - no direction needed
   uint8_t throttle = 0x00;   // Default 0%
+  const char* zone = "NEUTRAL";  
   
   if(potValue >= 612){
     // Forward zone
@@ -95,10 +95,12 @@ void sendCANMessages(int potValue){
     int forward_range = 1023 - 612;
     int throttle_percent = map(distance_from_min, 0, forward_range, 0, 100);
     throttle = map(throttle_percent, 0, 100, 0x00, 0xFA);
+    zone = "FORWARD";   // Add this line back!
   }
   else if(potValue < 612 && potValue > 412){
     // Neutral zone
     throttle = 0x00;   // 0%
+    zone = "NEUTRAL";   // Add this line back!
   }
   else{
     // Reverse zone  
@@ -106,6 +108,7 @@ void sendCANMessages(int potValue){
     int reverse_range = 412 - 0;
     int throttle_percent = map(distance_from_max, 0, reverse_range, 0, 100);
     throttle = map(throttle_percent, 0, 100, 0x00, 0xFA);
+    zone = "REVERSE";   // Add this line back!
   }
   
   // Send Primary Status Message (ID 0x4B4) - just allow control
@@ -125,4 +128,13 @@ void sendCANMessages(int potValue){
   prop_msg.buf[0] = throttle;    // Just the throttle value
   for(int i = 1; i < 8; i++) prop_msg.buf[i] = 0xFF;  // Fill rest with 0xFF
   can1.write(prop_msg);
+
+  Serial.print("CAN - Pot: ");
+  Serial.print(potValue);
+  Serial.print(" | Zone: ");
+  Serial.print(zone);
+  Serial.print(" | Throttle: ");
+  Serial.print(map(throttle, 0x00, 0xFA, 0, 100));
+  Serial.print("% | Raw: 0x");
+  Serial.println(throttle, HEX);
 }
