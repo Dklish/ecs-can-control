@@ -15,6 +15,9 @@ Author:Diego Klish
 #define NEUTRAL_LED 9
 #define REVERSE_LED 8
 
+unsigned long lastBlink = 0;  // Tracks when we last blinked
+bool ledState = false;
+
 void setup(){
   Serial.begin(115200); delay(400);
   pinMode(POTENTIOMETER_PIN, INPUT);
@@ -26,7 +29,10 @@ void setup(){
 void loop(){
    int potValue = analogRead(POTENTIOMETER_PIN);
    //Serial.print(potValue);
-  
+    analogWrite(FORWARD_LED, 0);
+    analogWrite(NEUTRAL_LED, 0);  // <-- This turns off neutral
+    analogWrite(REVERSE_LED, 0);
+
   if(potValue >= 612){
     int distance_from_min = potValue - 612;
     int forward_range = 1023 - 612;
@@ -37,6 +43,7 @@ void loop(){
       ledState = !ledState;
       lastBlink = millis();
     }
+     analogWrite(FORWARD_LED, ledState ? 255 : 0);
   }
   else if(potValue < 612 && potValue > 412){
     analogWrite(NEUTRAL_LED, 255);
