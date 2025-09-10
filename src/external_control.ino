@@ -1,9 +1,9 @@
-/* Intial code to test two diffirent can bus on the teensy commmunicating with one another over high and low CAN lines 
--familiarzing myself with the flex can library as well as the CAN protocol 
--this program starts two can controllers and has one sending and one recieving from the other
+/* External Control System for Glendinning CC2 marine control protocol
+This external control system takes in CAN messages and processes them from the primary 
+and can then send Manual throttle command interface via serial when primary is in neutral and 
+allows for control, Bi-directional communication with the primary controller
 Author:Diego Klish 
 */
-
 #include <FlexCAN_T4.h>
 
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;//setup CAN bus
@@ -19,31 +19,20 @@ uint8_t port_throttle = 0x00;
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);
-  
+
   can1.begin();
   can1.setBaudRate(250000);
 
 }
 
 void loop() {
-  // Read CAN messages
+  // Read CAN messags
   CAN_message_t msg;
   while (can1.read(msg)) {
     if (msg.id == PRIMARY_STATUS_ID) {
-      bool was_allowed = primary_allows_control;
-      primary_allows_control = (msg.buf[0] == 0x00);
-      
-      if (was_allowed != primary_allows_control) {
-        Serial.print("Control: ");
-        Serial.println(primary_allows_control ? "ACTIVE" : "INACTIVE");
-      }
-    }
-  }
-  
-  CAN_message_t msg;
-  while (can1.read(msg)) {
-    if (msg.id == PRIMARY_STATUS_ID) {
+      Serial.print("Status message buf[0]: 0x");  // Add this line
+      Serial.println(msg.buf[0], HEX); 
+
       bool was_allowed = primary_allows_control;
       primary_allows_control = (msg.buf[0] == 0x00);
       
@@ -60,12 +49,13 @@ void loop() {
       Serial.println("%");
     }
   }
+
   // Handle commands
   if (Serial.available()) {
     String cmd = Serial.readStringUntil('\n');
     cmd.trim();
     cmd.toLowerCase();
-    
+  
     if (cmd.startsWith("st")) {
       int val = constrain(cmd.substring(2).toInt(), 0, 100);
       stbd_throttle = map(val, 0, 100, 0x00, 0xFA);
