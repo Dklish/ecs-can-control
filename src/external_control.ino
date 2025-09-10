@@ -41,6 +41,25 @@ void loop() {
     }
   }
   
+  CAN_message_t msg;
+  while (can1.read(msg)) {
+    if (msg.id == PRIMARY_STATUS_ID) {
+      bool was_allowed = primary_allows_control;
+      primary_allows_control = (msg.buf[0] == 0x00);
+      
+      if (was_allowed != primary_allows_control) {
+        Serial.print("Control: ");
+        Serial.println(primary_allows_control ? "ACTIVE" : "INACTIVE");
+      }
+    }
+    else if (msg.id == 0x4B2) {  // PRIMARY_PROP_ID
+      uint8_t primary_throttle = msg.buf[0];
+      int throttle_percent = map(primary_throttle, 0x00, 0xFA, 0, 100);
+      Serial.print("Primary sending throttle: ");
+      Serial.print(throttle_percent);
+      Serial.println("%");
+    }
+  }
   // Handle commands
   if (Serial.available()) {
     String cmd = Serial.readStringUntil('\n');
@@ -79,4 +98,4 @@ void loop() {
     can1.write(prop_msg);
     lastSend = millis();
   }
-}}
+}
