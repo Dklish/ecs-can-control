@@ -1,14 +1,15 @@
-/* External Control System for Glendinning CC2 marine control protocol
-This external control system takes in CAN messages and processes them from the primary 
-and can then send Manual throttle command interface via serial when primary is in neutral and 
-allows for control, Bi-directional communication with the primary controller
+/*  External Control System for CAN Bus Communication Protocol
+-This external control system receives and processes CAN messages from the primary controller and provides 
+manual throttle command interface via serial when the primary 
+-System allows control handoff. Demonstrates bi-directional CAN bus communication 
+patterns commonly used in industrial control applications.
 Author:Diego Klish 
 */
 #include <FlexCAN_T4.h>
 
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;//setup CAN bus
 
-// Glendinning CC2 Message IDs
+//Message IDs
 #define PRIMARY_STATUS_ID    0x4B4
 #define ECS_PROP_CMD_ID      0x4B3
 

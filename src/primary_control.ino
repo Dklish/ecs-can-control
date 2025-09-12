@@ -1,5 +1,5 @@
 /* Dive deeper into the protocol for CAN 
--Modeling it now after actual use case with primary and external control system signals 
+-Modeling it now after use case with primary and external control system signals 
 being sent to and from the CAN bus, Modeling the Primary control system using a potentiemteer 
 as a throttle and LEDS to signify what gear and how fast in that geaer based on blinking then we will use 
 other external control system to "take control" 
